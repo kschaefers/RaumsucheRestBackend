@@ -2,17 +2,17 @@
 
 class User
 {
-    public $mMtklNr;
-    public $mPassword;
-    public $mName;
-    public $mFaculty;
+    public $mtklNr;
+    public $password;
+    public $name;
+    public $faculty;
 
     public function __construct($pMtklNr, $pPassword, $pName, $pFaculty)
     {
-        $this->mMtklNr = intval($pMtklNr);
-        $this->mPassword = $pPassword;
-        $this->mName = $pName;
-        $this->mFaculty = $pFaculty;
+        $this->mtklNr = intval($pMtklNr);
+        $this->password = $pPassword;
+        $this->name = $pName;
+        $this->faculty = $pFaculty;
     }
 
 
@@ -27,10 +27,10 @@ class User
             Faculty = :faculty"
         );
         $st->execute(array(
-            ':mtklNr' => $this->mMtklNr,
-            ':password' => $this->mPassword,
-            ':name' => $this->mName,
-            ':faculty' => $this->mFaculty
+            ':mtklNr' => $this->mtklNr,
+            ':password' => $this->password,
+            ':name' => $this->name,
+            ':faculty' => $this->faculty
         ));
     }
 
@@ -45,10 +45,10 @@ class User
             WHERE MtklNr = :mtklNr"
         );
         $st->execute(array(
-            ':mtklNr' => $this->mMtklNr,
-            ':password' => $this->mPassword,
-            ':name' => $this->mName,
-            ':faculty' => $this->mFaculty
+            ':mtklNr' => $this->mtklNr,
+            ':password' => $this->password,
+            ':name' => $this->name,
+            ':faculty' => $this->faculty
         ));
     }
 
