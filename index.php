@@ -55,6 +55,12 @@ $app->delete('/users/:id',function($id){
 	echo json_encode($deleted);
 });
 
+$app->get('/users/:id/groups', function ($id) {
+	$groups = User::getAllGroupsOfUser($id);
+
+	echo json_encode($groups);
+});
+
 // === RESERVATIONS ===
 $app->get('/reservations/:id', function ($id) {
 $room = "A212";
@@ -109,4 +115,11 @@ $app->post('/groups/:id', function ($id) use($app){
     $group = new Group($postArray['name'],$postArray['owner'],$postArray['users'],$postArray['groupImage']);
     $group->update();
 });
+
+$app->get('/groups/:id', function ($id) {
+	$group = Group::getGroupById($id);
+
+	echo json_encode($group);
+});
+
 $app->run();

@@ -16,6 +16,10 @@ class Group
 		$this->groupImage = $pGroupImage;
 	}
 
+    function addMember($member) {
+        $this->users[] = $member;
+    }
+
 	function add()
 	{
 		$pdo = db::getPDO();
