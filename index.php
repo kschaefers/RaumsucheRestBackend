@@ -13,6 +13,18 @@ require_once 'models/User.php';
 require_once 'models/Group.php';
 require_once 'models/Reservation.php';
 
+function rand_passwd( $length = 8, $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' ) {
+	return substr( str_shuffle( $chars ), 0, $length );
+}
+
+function sendEmail($studentId, $password){
+	$header = 'From: Raumsuchenapp <no-reply@raumsuche.hsma.org>' . "\r\n" .
+		'Reply-To: no-reply@raumsuche.hsma.org' . "\r\n" .
+		'X-Mailer: PHP/' . phpversion();
+
+	mail($studentId.'@stud.hs-mannheim.de', 'Dein Passwort', "Dein Passwort für die Raumsuchenapp lautet:\n\n".$password, $header);
+}
+
 $app = new \Slim\Slim();
 $app->get('/', function () {
     echo "RAUMSUCHE API";
@@ -32,12 +44,15 @@ $app->get('/users/:id', function ($id) {
     echo json_encode($user);
 });
 
-$app->put('/users/',function() use($app){
+$app->put('/users/', function () use ($app) {
 	$put = json_decode($app->request()->getBody());
 
+	$password = rand_passwd();
 	// make it a PHP associative array
 	$putArray = get_object_vars($put);
-	$user = new User($putArray['mtklNr'],$putArray['password'],$putArray['name'],$putArray['faculty']);
+	$user = new User($putArray['mtklNr'], md5($password), $putArray['name'], $putArray['faculty']);
+
+	sendEmail($putArray['mtklNr'], $password);
 	$user->add();
 
 	echo json_encode($user);
