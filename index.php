@@ -143,7 +143,7 @@ $app->get('/rooms', function ($request, $response, $args) {
 
 // === GROUPS ===
 // example json: {"name":"TestGroup","owner":1510651,"users":[123],"groupImage":"path\/to\/image"}
-$app->put('/groups/',function ($request, $response, $args){
+$app->put('/groups',function ($request, $response, $args){
 	$put = json_decode($request->getBody());
 
 	// make it a PHP associative array
@@ -154,7 +154,7 @@ $app->put('/groups/',function ($request, $response, $args){
 	echo json_encode($group);
 });
 
-$app->get('/groups/',function ($request, $response, $args){
+$app->get('/groups',function ($request, $response, $args){
 	$groups = Group::getAllGroups();
 
 	echo json_encode($groups);
