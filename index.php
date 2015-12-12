@@ -65,6 +65,24 @@ $room = "A212";
     echo json_encode($reservation);
 });
 
+// === ROOMS ===
+
+$app->get('/rooms/', function () use($app) {
+	$day = $app->request()->get('day');
+	$hour = $app->request()->get('hour');
+	$size = $app->request()->get('size');
+	$computer = $app->request()->get('computer');
+	$beamer = $app->request()->get('beamer');
+	$pool = $app->request()->get('pool');
+	$looseSeating = $app->request()->get('looseSeating');
+	$video = $app->request()->get('video');
+	$building = $app->request()->get('building');
+
+	$roomArray = Room::Search($building,$day,$hour,$size,$computer,$beamer,$pool,$looseSeating,$video);
+
+	echo json_encode($roomArray);
+});
+
 // === GROUPS ===
 $app->get('/groups/:id', function ($id) {
 	$user = new User($id,"omgapassword","Test User", "I");
