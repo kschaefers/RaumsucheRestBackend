@@ -130,7 +130,19 @@ class Group
             ':id' => $id
         ));
         $result = $st->fetch();
-        $group = new Group($result['Id'], $result['Name'], $result['OwnerId'], $result['Name'], $result['Faculty']);
+        $members = array();
+        $stMembers = $pdo->prepare(
+            "SELECT * FROM users WHERE MtklNr IN (SELECT userId FROM user_in_group WHERE groupId = :id)"
+        );
+        $stMembers->execute(array(
+            ':id' => $id
+        ));
+        $resultMembers = $stMembers->fetchAll();
+        foreach ($resultMembers as $member) {
+            $members[] = new User($member['MtklNr'], null, $member['Name'], $member['Faculty']);
+        }
+
+        $group = new Group($id, $result['Name'], $result['OwnerId'], $members, $result['GroupImage']);
         return $group;
     }
 
