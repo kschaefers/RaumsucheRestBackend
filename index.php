@@ -1,4 +1,11 @@
 <?php
+
+ini_set("log_errors", 1);
+ini_set("error_log", "./php-error.log");
+ini_set('error_reporting',E_ALL);
+ini_set('display_errors',true);
+error_log("Hello, errors!");
+
 header("Content-Type: application/json");
 require 'vendor/autoload.php';
 require_once 'db.php';
@@ -21,7 +28,7 @@ $app->get('/users/', function(){
 
 $app->get('/users/:id', function ($id) {
 	$user = User::getUserByMtrklNr($id);
-	
+
     echo json_encode($user);
 });
 
@@ -39,7 +46,6 @@ $app->put('/users/',function() use($app){
 $app->post('/users/:id', function ($id) use($app){
 	$post = json_decode($app->request()->getBody());
 	$postArray = get_object_vars($post);
-	var_dump($postArray);
 	$user = new User($id,$postArray['password'],$postArray['name'],$postArray['faculty']);
 	$user->update();
 });
@@ -51,11 +57,11 @@ $app->delete('/users/:id',function($id){
 
 // === RESERVATIONS ===
 $app->get('/reservations/:id', function ($id) {
-$room = new Room(5,"A",0,array(666.666,777.777),45,array(new RoomProperty('Beamer')));
+$room = "A212";
 	$user = new User($id,"omgapassword","Test User", "I");
 	$group = new Group("TestGroup", $user, array($user),"path/to/image");
 	$reservation = new Reservation($room, $user, $group);
-	
+
     echo json_encode($reservation);
 });
 
@@ -63,7 +69,26 @@ $room = new Room(5,"A",0,array(666.666,777.777),45,array(new RoomProperty('Beame
 $app->get('/groups/:id', function ($id) {
 	$user = new User($id,"omgapassword","Test User", "I");
 	$group = new Group("TestGroup", $user, array($user),"path/to/image");
-	
+
     echo json_encode($group);
+});
+
+// example json: {"name":"TestGroup","owner":1510651,"users":[123],"groupImage":"path\/to\/image"}
+$app->put('/groups/',function() use($app){
+	$put = json_decode($app->request()->getBody());
+
+	// make it a PHP associative array
+	$putArray = get_object_vars($put);
+	$group = new Group($putArray['name'],$putArray['owner'],$putArray['users'],$putArray['groupImage']);
+	$group->add();
+
+	echo json_encode($group);
+});
+
+$app->post('/groups/:id', function ($id) use($app){
+    $post = json_decode($app->request()->getBody());
+    $postArray = get_object_vars($post);
+    $group = new Group($postArray['name'],$postArray['owner'],$postArray['users'],$postArray['groupImage']);
+    $group->update();
 });
 $app->run();

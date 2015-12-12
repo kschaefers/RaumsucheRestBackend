@@ -1,6 +1,5 @@
 <?php
 
-require_once 'Room.php';
 require_once 'Group.php';
 require_once 'User.php';
 
@@ -15,6 +14,6 @@ class Reservation
 		$this->mUser = $pUser;
 		$this->mGroup = $pGroup;
 	}
-	
-	
+
+
 }

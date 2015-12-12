@@ -1,11 +1,5 @@
 <?php
 
-/**Sorry!!! Hier die DB Zugangsdaten:
- * User: d02043d3
- * DB-Name: d02043d3
- * Passwort: h8rQLgrhrRNZoZGw
- */
-
 class db
 {
 
