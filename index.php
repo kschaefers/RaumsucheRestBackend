@@ -26,11 +26,13 @@ function sendEmail($studentId, $password){
 	mail($studentId.'@stud.hs-mannheim.de', 'Dein Passwort', "Dein Passwort fuer die Raumsuchenapp lautet:\n\n".$password, $header);
 }
 
-$app = new \Slim\App;
+$container = new \Slim\Container(['settings' => ['displayErrorDetails' => true]]);
+$app = new \Slim\App($container);
 
 $app->add(new \Slim\Middleware\HttpBasicAuthentication([
 	"path" => ["/users", "/groups"],
 	"realm" => "Protected",
+	"secure" => false,
 	"authenticator" => new PdoAuthenticator([
 		"pdo" => db::getPDO(),
         "table" => "users",
