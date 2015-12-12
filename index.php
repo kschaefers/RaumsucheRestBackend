@@ -10,6 +10,7 @@ require 'vendor/autoload.php';
 require_once 'db.php';
 require_once 'models/User.php';
 require_once 'models/Group.php';
+require_once 'models/Room.php';
 require_once 'models/Reservation.php';
 
 use \Slim\Middleware\HttpBasicAuthentication\PdoAuthenticator;
@@ -33,6 +34,7 @@ $app->add(new \Slim\Middleware\HttpBasicAuthentication([
 	"path" => ["/users", "/groups"],
 	"realm" => "Protected",
 	"secure" => false,
+	"environment" => "REDIRECT_HTTP_AUTHORIZATION",
 	"authenticator" => new PdoAuthenticator([
 		"pdo" => db::getPDO(),
         "table" => "users",
@@ -46,15 +48,15 @@ $app->get('/', function () {
 });
 
 // === USERS ===
-$app->get('/users/', function(){
+$app->get('/users', function($request, $response, $args){
 
 	$users = User::getUsers();
 
 	echo json_encode($users);
 });
 
-$app->get('/users/:id', function ($id) {
-	$user = User::getUserByMtrklNr($id);
+$app->get('/users/{id}', function ($request, $response, $args) {
+	$user = User::getUserByMtrklNr($args['id']);
 
     echo json_encode($user);
 });
@@ -103,16 +105,36 @@ $room = "A212";
 
 // === ROOMS ===
 
-$app->get('/rooms/', function ($request, $response, $args) {
-	$day = $request->get('day');
-	$hour = $request->get('hour');
-	$size = $request->get('size');
-	$computer = $request->get('computer');
-	$beamer = $request->get('beamer');
-	$pool = $request->get('pool');
-	$looseSeating = $request->get('looseSeating');
-	$video = $request->get('video');
-	$building = $request->get('building');
+$app->get('/rooms', function ($request, $response, $args) {
+
+	$building = $day = $hour = $size = $computer = $beamer = $pool = $looseSeating = $video = null;
+	if (array_key_exists('day',$request->getQueryParams())) {
+		$day = $request->getQueryParams()['day'];
+	}
+	if (array_key_exists('hour',$request->getQueryParams())) {
+		$hour = $request->getQueryParams()['hour'];
+	}
+	if (array_key_exists('size',$request->getQueryParams())) {
+		$size = $request->getQueryParams()['size'];
+	}
+	if (array_key_exists('computer',$request->getQueryParams())) {
+		$computer = $request->getQueryParams()['computer'];
+	}
+	if (array_key_exists('beamer',$request->getQueryParams())) {
+		$beamer = $request->getQueryParams()['beamer'];
+	}
+	if (array_key_exists('pool',$request->getQueryParams())) {
+		$pool = $request->getQueryParams()['pool'];
+	}
+	if (array_key_exists('looseSeating',$request->getQueryParams())) {
+		$looseSeating = $request->getQueryParams()['looseSeating'];
+	}
+	if (array_key_exists('video',$request->getQueryParams())) {
+		$video = $request->getQueryParams()['video'];
+	}
+	if (array_key_exists('building',$request->getQueryParams())) {
+		$building = $request->getQueryParams()['building'];
+	}
 
 	$roomArray = Room::Search($building,$day,$hour,$size,$computer,$beamer,$pool,$looseSeating,$video);
 
