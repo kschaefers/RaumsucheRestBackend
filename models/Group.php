@@ -104,6 +104,32 @@ class Group
         $pdo->commit();
     }
 
+    static function getAllGroups()
+    {
+        $pdo = db::getPDO();
+        $st = $pdo->query(
+            "SELECT g.Id AS GroupId, g.Name AS GroupName, g.OwnerId AS GroupOwnerId, g.GroupImage, u.MtklNr, u.Name AS UserName, u.Faculty
+            FROM user_in_group AS uig
+            LEFT JOIN groups AS g ON uig.groupId = g.Id
+            LEFT JOIN users AS u ON uig.userId = u.MtklNr
+            ORDER BY g.Id"
+        );
+        $result = $st->fetchAll();
+        $groups = array();
+        for ($i = 0; $i < count($result); $i++) {
+            if ($i > 0 && $result[$i - 1]['GroupId'] == $result[$i]['GroupId']) {
+                $newMember = new User($result[$i]['MtklNr'], null, $result[$i]['UserName'], $result[$i]['Faculty']);
+                $group = $groups[count($groups) - 1];
+                $group->addMember($newMember);
+            } else {
+                $members = array();
+                $members[] = new User($result[$i]['MtklNr'], null, $result[$i]['UserName'], $result[$i]['Faculty']);
+                $groups[] = new Group($result[$i]['GroupName'], $result[$i]['GroupOwnerId'], $members, $result[$i]['GroupImage']);
+            }
+        }
+        return $groups;
+    }
+
     static function getGroupById($id) {
         $pdo = db::getPDO();
         $st = $pdo->prepare(
@@ -116,5 +142,17 @@ class Group
         $result = $st->fetch();
         $group = new Group($result['Name'], $result['OwnerId'], $result['Name'], $result['Faculty']);
         return $group;
+    }
+
+    static function deleteGroupById($id)
+    {
+        $pdo = db::getPDO();
+        $st = $pdo->prepare(
+            "DELETE FROM groups WHERE Id = :id"
+        );
+        $result =  $st->execute(array(
+            ':id' => $id
+        ));
+        return $result;
     }
 }

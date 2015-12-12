@@ -105,13 +105,6 @@ $app->get('/rooms/', function () use($app) {
 });
 
 // === GROUPS ===
-$app->get('/groups/:id', function ($id) {
-	$user = new User($id,"omgapassword","Test User", "I");
-	$group = new Group("TestGroup", $user, array($user),"path/to/image");
-
-    echo json_encode($group);
-});
-
 // example json: {"name":"TestGroup","owner":1510651,"users":[123],"groupImage":"path\/to\/image"}
 $app->put('/groups/',function() use($app){
 	$put = json_decode($app->request()->getBody());
@@ -124,11 +117,10 @@ $app->put('/groups/',function() use($app){
 	echo json_encode($group);
 });
 
-$app->post('/groups/:id', function ($id) use($app){
-    $post = json_decode($app->request()->getBody());
-    $postArray = get_object_vars($post);
-    $group = new Group($postArray['name'],$postArray['owner'],$postArray['users'],$postArray['groupImage']);
-    $group->update();
+$app->get('/groups/',function() use($app){
+	$groups = Group::getAllGroups();
+
+	echo json_encode($groups);
 });
 
 $app->get('/groups/:id', function ($id) {
@@ -136,5 +128,18 @@ $app->get('/groups/:id', function ($id) {
 
 	echo json_encode($group);
 });
+
+$app->post('/groups/:id', function ($id) use($app){
+    $post = json_decode($app->request()->getBody());
+    $postArray = get_object_vars($post);
+    $group = new Group($postArray['name'],$postArray['owner'],$postArray['users'],$postArray['groupImage']);
+    $group->update();
+});
+
+$app->delete('/groups/:id',function($id){
+	$deleted = Group::deleteGroupById($id);
+	echo json_encode($deleted);
+});
+
 
 $app->run();
