@@ -1,92 +1,114 @@
 <?php
 /**
- * Slim - a micro PHP 5 framework
+ * Slim Framework (http://slimframework.com)
  *
- * @author      Josh Lockhart <info@slimframework.com>
- * @copyright   2011 Josh Lockhart
- * @link        http://www.slimframework.com
- * @license     http://www.slimframework.com/license
- * @version     2.6.1
- *
- * MIT LICENSE
- *
- * Permission is hereby granted, free of charge, to any person obtaining
- * a copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without limitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
- * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
- * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
- * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * @link      https://github.com/slimphp/Slim
+ * @copyright Copyright (c) 2011-2015 Josh Lockhart
+ * @license   https://github.com/slimphp/Slim/blob/3.x/LICENSE.md (MIT License)
  */
-class CookiesTest extends PHPUnit_Framework_TestCase
-{
-    public function testSetWithStringValue()
-    {
-        $c = new \Slim\Http\Cookies();
-        $c->set('foo', 'bar');
-        $this->assertAttributeEquals(
-            array(
-                'foo' => array(
-                    'value' => 'bar',
-                    'expires' => null,
-                    'domain' => null,
-                    'path' => null,
-                    'secure' => false,
-                    'httponly' => false
-                )
-            ),
-            'data',
-            $c
-        );
-    }
+namespace Slim\Tests\Http;
 
-    public function testSetWithArrayValue()
+use ReflectionProperty;
+use Slim\Http\Cookies;
+
+class CookiesTest extends \PHPUnit_Framework_TestCase
+{
+    // public function testArrayToString()
+    // {
+    //     $expiresAt = time();
+    //     $result = Cookies::arrayToString([
+    //         'value' => 'bar',
+    //         'expires' => $expiresAt,
+    //         'path' => '/foo',
+    //         'domain' => 'example.com',
+    //         'secure' => true,
+    //         'httponly' => true
+    //     ]);
+
+    //     $this->assertEquals('bar; domain=example.com; path=/foo; expires=' . gmdate('D, d-M-Y H:i:s e', $expiresAt) . '; secure; HttpOnly', $result);
+    // }
+
+    // /**
+    //  * @expectedException \InvalidArgumentException
+    //  */
+    // public function testArrayToStringWithoutValue()
+    // {
+    //     $result = Cookies::arrayToString([
+    //         'expires' => time(),
+    //         'path' => '/foo',
+    //         'domain' => 'example.com',
+    //         'secure' => true,
+    //         'httponly' => true
+    //     ]);
+    // }
+
+    // public function testParseHeader()
+    // {
+    //     $value = 'Abc=One;Def=Two;Ghi=Three';
+    //     $shouldBe = [
+    //         'Abc' => 'One',
+    //         'Def' => 'Two',
+    //         'Ghi' => 'Three',
+    //     ];
+
+    //     $this->assertEquals($shouldBe, Cookies::parseHeader($value));
+    // }
+
+    // public function testParseHeaderWithOneValue()
+    // {
+    //     $value = 'Abc=One';
+
+    //     $this->assertEquals(['Abc' => 'One'], Cookies::parseHeader($value));
+    // }
+
+    // public function testParseHeaderArray()
+    // {
+    //     $value = ['Abc=One;Def=Two;Ghi=Three'];
+    //     $shouldBe = [
+    //         'Abc' => 'One',
+    //         'Def' => 'Two',
+    //         'Ghi' => 'Three',
+    //     ];
+
+    //     $this->assertEquals($shouldBe, Cookies::parseHeader($value));
+    // }
+
+    // /**
+    //  * @expectedException \InvalidArgumentException
+    //  */
+    // public function testParseHeaderInvalid()
+    // {
+    //     Cookies::parseHeader(100);
+    // }
+
+    // public function testParseEmptyHeader()
+    // {
+    //     $value = '';
+
+    //     $this->assertEquals([], Cookies::parseHeader($value));
+    // }
+
+    public function testSetDefaults()
     {
-        $now = time();
-        $c = new \Slim\Http\Cookies();
-        $c->set('foo', array(
-            'value' => 'bar',
-            'expires' => $now + 86400,
-            'domain' => '.example.com',
-            'path' => '/',
+        $defaults = [
+            'value' => 'toast',
+            'domain' => null,
+            'path' => null,
+            'expires' => null,
             'secure' => true,
             'httponly' => true
-        ));
-        $this->assertAttributeEquals(
-            array(
-                'foo' => array(
-                    'value' => 'bar',
-                    'expires' => $now + 86400,
-                    'domain' => '.example.com',
-                    'path' => '/',
-                    'secure' => true,
-                    'httponly' => true
-                )
-            ),
-            'data',
-            $c
-        );
-    }
+        ];
 
-    public function testRemove()
-    {
-        $c = new \Slim\Http\Cookies();
-        $c->remove('foo');
-        $prop = new \ReflectionProperty($c, 'data');
+        $cookies = new Cookies;
+
+        $prop = new ReflectionProperty($cookies, 'defaults');
         $prop->setAccessible(true);
-        $cValue = $prop->getValue($c);
-        $this->assertEquals('', $cValue['foo']['value']);
-        $this->assertLessThan(time(), $cValue['foo']['expires']);
+
+        $origDefaults = $prop->getValue($cookies);
+
+        $cookies->setDefaults($defaults);
+
+        $this->assertEquals($defaults, $prop->getValue($cookies));
+        $this->assertNotEquals($origDefaults, $prop->getValue($cookies));
     }
 }
