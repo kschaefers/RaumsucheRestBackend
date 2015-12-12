@@ -80,6 +80,7 @@ $app->post('/users/{id}', function ($request, $response, $args){
 	$postArray = get_object_vars($post);
 	$user = new User($args['id'],$postArray['password'],$postArray['name'],$postArray['faculty']);
 	$user->update();
+	echo json_encode($user);
 });
 
 $app->delete('/users/{id}', function ($request, $response, $args){
@@ -148,7 +149,7 @@ $app->put('/groups',function ($request, $response, $args){
 
 	// make it a PHP associative array
 	$putArray = get_object_vars($put);
-	$group = new Group($putArray['name'],$putArray['owner'],$putArray['users'],$putArray['groupImage']);
+	$group = new Group(null, $putArray['name'],$putArray['owner'],$putArray['users'],$putArray['groupImage']);
 	$group->add();
 
 	echo json_encode($group);
@@ -169,8 +170,9 @@ $app->get('/groups/{id}', function ($request, $response, $args) {
 $app->post('/groups/{id}', function ($request, $response, $args){
     $post = json_decode($request->getBody());
     $postArray = get_object_vars($post);
-    $group = new Group($postArray['name'],$postArray['owner'],$postArray['users'],$postArray['groupImage']);
+    $group = new Group($args['id'], $postArray['name'],$postArray['owner'],$postArray['users'],$postArray['groupImage']);
     $group->update();
+	echo json_encode($group);
 });
 
 $app->delete('/groups/{id}', function ($request, $response, $args){

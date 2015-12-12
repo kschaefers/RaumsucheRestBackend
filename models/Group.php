@@ -4,13 +4,15 @@ require_once 'User.php';
 
 class Group
 {
-	public $name;
+	public $id;
+    public $name;
 	public $owner;
 	public $users;
 	public $groupImage;
 
-	public function __construct($pName, $pOwner, Array $pUsers, $pGroupImage = null){
-		$this->name = $pName;
+	public function __construct($id = null, $pName, $pOwner, Array $pUsers, $pGroupImage = null){
+		$this->id = $id;
+        $this->name = $pName;
 		$this->owner = $pOwner;
 		$this->users = $pUsers;
 		$this->groupImage = $pGroupImage;
@@ -37,16 +39,7 @@ class Group
 				':groupImage' => $this->groupImage
 		));
         $currentGroupId = $pdo->lastInsertId();
-        // add owner as group member
-        $st1 = $pdo->prepare(
-            "INSERT INTO user_in_group SET
-            userId = :ownerId,
-            groupId = :groupId"
-        );
-        $st1->execute(array(
-            ':ownerId' => $this->owner,
-            ':groupId' => $currentGroupId
-        ));
+        $this->id = $currentGroupId;
         foreach ($this->users as $user) {
             // add others as group members
             $stUser = $pdo->prepare(
@@ -71,23 +64,20 @@ class Group
             "UPDATE groups SET
             Name = :name,
             OwnerId = :ownerId,
-            GroupImage = :groupImage"
+            GroupImage = :groupImage
+            WHERE Id = :id"
         );
         $st->execute(array(
             ':name' => $this->name,
             ':ownerId' => $this->owner,
-            ':groupImage' => $this->groupImage
+            ':groupImage' => $this->groupImage,
+            ':id' => $this->id
         ));
-        $currentGroupId = $pdo->lastInsertId();
-        // add owner as group member
-        $st1 = $pdo->prepare(
-            "INSERT INTO user_in_group SET
-            userId = :ownerId,
-            groupId = :groupId"
+        $stDeleteUsers = $pdo->prepare(
+            "DELETE FROM user_in_group WHERE groupId = :id"
         );
-        $st1->execute(array(
-            ':ownerId' => $this->owner,
-            ':groupId' => $currentGroupId
+        $stDeleteUsers->execute(array(
+            ':id' => $this->id
         ));
         foreach ($this->users as $user) {
             // add others as group members
@@ -98,7 +88,7 @@ class Group
             );
             $stUser->execute(array(
                 ':ownerId' => $user,
-                ':groupId' => $currentGroupId
+                ':groupId' => $this->id
             ));
         }
         $pdo->commit();
@@ -124,7 +114,7 @@ class Group
             } else {
                 $members = array();
                 $members[] = new User($result[$i]['MtklNr'], null, $result[$i]['UserName'], $result[$i]['Faculty']);
-                $groups[] = new Group($result[$i]['GroupName'], $result[$i]['GroupOwnerId'], $members, $result[$i]['GroupImage']);
+                $groups[] = new Group($result[$i]['GroupId'], $result[$i]['GroupName'], $result[$i]['GroupOwnerId'], $members, $result[$i]['GroupImage']);
             }
         }
         return $groups;
@@ -140,7 +130,7 @@ class Group
             ':id' => $id
         ));
         $result = $st->fetch();
-        $group = new Group($result['Name'], $result['OwnerId'], $result['Name'], $result['Faculty']);
+        $group = new Group($result['Id'], $result['Name'], $result['OwnerId'], $result['Name'], $result['Faculty']);
         return $group;
     }
 
