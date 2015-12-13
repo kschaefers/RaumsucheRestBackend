@@ -116,7 +116,7 @@ class User
             } else {
                 $members = array();
                 $members[] = new User($result[$i]['MtklNr'], null, $result[$i]['UserName'], $result[$i]['Faculty']);
-                $groups[] = new Group($result[$i]['GroupName'], $result[$i]['GroupOwnerId'], $members, $result[$i]['GroupImage']);
+                $groups[] = new Group($result[$i]['GroupId'], $result[$i]['GroupName'], $result[$i]['GroupOwnerId'], $members, $result[$i]['GroupImage']);
             }
         }
         return $groups;

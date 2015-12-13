@@ -98,7 +98,7 @@ $app->get('/users/{id}/groups', function ($request, $response, $args) {
 $app->get('/reservations/{id}', function ($request, $response, $args) {
 $room = "A212";
 	$user = new User($args['id'],"omgapassword","Test User", "I");
-	$group = new Group("TestGroup", $user, array($user),"path/to/image");
+	$group = new Group(1, "TestGroup", $user, array($user),"path/to/image");
 	$reservation = new Reservation($room, $user, $group);
 
     echo json_encode($reservation);
