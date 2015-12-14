@@ -44,7 +44,7 @@ class Room
             $buildingString = implode(' OR ',$buildings);
         }
 
-        $sql = sprintf('SELECT * FROM rooms WHERE Day = :day AND Hour IN (:hour) %s %s %s %s %s %s %s',
+        $sql = sprintf('SELECT * FROM rooms WHERE Day = :day AND FIND_IN_SET(HOUR, :hour) %s %s %s %s %s %s %s',
             !empty($size)   ? 'AND size >= :size'   : null,
             !empty($computer) ? 'AND computer = :computer' : null,
             !empty($beamer) ? 'AND beamer = :beamer' : null,
@@ -76,6 +76,7 @@ class Room
         }
         $st->execute();
         $result = $st->fetchAll();
+        var_dump(count($result),$st->queryString,$st->rowCount());
         $rooms = array();
         foreach ($result as $roomArray) {
             $rooms[] = new Room($roomArray['Name'], $roomArray['Day'], $roomArray['Hour'], $roomArray['Size'], $roomArray['Computer'], $roomArray['Beamer'], $roomArray['Pool'], $roomArray['LooseSeating'], $roomArray['Video']);
