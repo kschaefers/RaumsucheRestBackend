@@ -76,12 +76,15 @@ class Room
         }
         $st->execute();
         $result = $st->fetchAll();
-        var_dump(count($result),$st->queryString,$st->rowCount());
         $rooms = array();
         foreach ($result as $roomArray) {
-            $rooms[] = new Room($roomArray['Name'], $roomArray['Day'], $roomArray['Hour'], $roomArray['Size'], $roomArray['Computer'], $roomArray['Beamer'], $roomArray['Pool'], $roomArray['LooseSeating'], $roomArray['Video']);
+            if(array_key_exists($roomArray['Name'],$rooms)){
+                $rooms[$roomArray['Name']]->hour .= ",".$roomArray['Hour'];
+            }else{
+                $rooms[$roomArray['Name']] = new Room($roomArray['Name'], $roomArray['Day'], $roomArray['Hour'], $roomArray['Size'], $roomArray['Computer'], $roomArray['Beamer'], $roomArray['Pool'], $roomArray['LooseSeating'], $roomArray['Video']);
+            }
         }
 
-        return $rooms;
+        return array_values($rooms);
     }
 }
