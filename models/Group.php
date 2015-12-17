@@ -44,11 +44,11 @@ class Group
             // add others as group members
             $stUser = $pdo->prepare(
                 "INSERT INTO user_in_group SET
-            userId = :ownerId,
+            userId = :userId,
             groupId = :groupId"
             );
             $stUser->execute(array(
-                ':ownerId' => $user,
+                ':userId' => $user->mtklNr,
                 ':groupId' => $currentGroupId
             ));
         }
@@ -87,7 +87,7 @@ class Group
             groupId = :groupId"
             );
             $stUser->execute(array(
-                ':ownerId' => $user,
+                ':ownerId' => $user->mtklNr,
                 ':groupId' => $this->id
             ));
         }
