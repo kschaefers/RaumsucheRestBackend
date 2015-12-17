@@ -39,14 +39,12 @@ class User
         $pdo = db::getPDO();
         $st = $pdo->prepare(
             "UPDATE users SET
-            Password = :password,
             Name = :name,
             Faculty = :faculty
             WHERE MtklNr = :mtklNr"
         );
         $st->execute(array(
             ':mtklNr' => $this->mtklNr,
-            ':password' => $this->password,
             ':name' => $this->name,
             ':faculty' => $this->faculty
         ));
