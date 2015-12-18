@@ -11,7 +11,7 @@ require_once 'db.php';
 require_once 'models/User.php';
 require_once 'models/Group.php';
 require_once 'models/Room.php';
-require_once 'models/Reservation.php';
+require_once 'models/Meeting.php';
 
 use \Slim\Middleware\HttpBasicAuthentication\PdoAuthenticator;
 
@@ -78,16 +78,44 @@ $app->put('/register', function ($request, $response, $args) {
 });
 
 $app->post('/users/{id}', function ($request, $response, $args) {
-    $post = json_decode($request->getBody());
-    $postArray = get_object_vars($post);
-    $user = new User($args['id'], $postArray['password'], $postArray['name'], $postArray['faculty']);
-    $user->update();
-    echo json_encode($user);
+    $server_params = $request->getServerParams();
+    if (preg_match("/Basic\s+(.*)$/i", $server_params[$this->options["environment"]], $matches)) {
+        list($user, $password) = explode(":", base64_decode($matches[1]));
+    }
+    if ($args['id'] == $user) {
+        $post = json_decode($request->getBody());
+        $postArray = get_object_vars($post);
+        $user = new User($args['id'], $postArray['password'], $postArray['name'], $postArray['faculty']);
+        $user->update();
+        echo json_encode($user);
+    } else {
+        echo json_encode(false);
+    }
 });
 
 $app->delete('/users/{id}', function ($request, $response, $args) {
-    $deleted = User::deleteUserByMtrklNr($args['id']);
-    echo json_encode($deleted);
+    $server_params = $request->getServerParams();
+    if (preg_match("/Basic\s+(.*)$/i", $server_params[$this->options["environment"]], $matches)) {
+        list($user, $password) = explode(":", base64_decode($matches[1]));
+    }
+    if ($args['id'] == $user) {
+        $user = User::getUserByMtrklNr($args['id']);
+        $groups = User::getAllGroupsOfUser($args['id']);
+        foreach($groups as $group){
+            $group->removeMember($user);
+            if(empty($group->users)){
+                Group::deleteGroupById($group->id);
+            }
+            if($group->owner == $args['id']){
+                $group->owner = $group->users[0];
+            }
+        }
+        $deleted = User::deleteUserByMtrklNr($args['id']);
+        echo json_encode($deleted);
+    } else {
+        echo json_encode(false);
+    }
+
 });
 
 $app->get('/users/{id}/groups', function ($request, $response, $args) {
@@ -96,14 +124,38 @@ $app->get('/users/{id}/groups', function ($request, $response, $args) {
     echo json_encode($groups);
 });
 
-// === RESERVATIONS ===
-$app->get('/reservations/{id}', function ($request, $response, $args) {
-$room = "A212";
-	$user = new User($args['id'],"omgapassword","Test User", "I");
-	$group = new Group(1, "TestGroup", $user, array($user),"path/to/image");
-	$reservation = new Reservation($room, $user, $group);
+// === MEETINGS ===
+$app->get('/meetings/{id}', function ($request, $response, $args) {
+    $meeting = Meeting::getMeetingById($args['id']);
 
-    echo json_encode($reservation);
+    echo json_encode($meeting);
+});
+
+$app->put('/meetings', function ($request, $response, $args) {
+    $put = json_decode($request->getBody());
+
+    // make it a PHP associative array
+    $putArray = get_object_vars($put);
+    $meeting = new Meeting(null, $putArray['room'], $putArray['groupId'], $putArray['day'], $putArray['hour']);
+    $meeting->add();
+
+    echo json_encode($meeting);
+});
+
+$app->post('/meetings/{id}', function ($request, $response, $args) {
+
+        $post = json_decode($request->getBody());
+        $postArray = get_object_vars($post);
+        $meeting = new Meeting($args['id'], $postArray['room'], $postArray['groupId'], $postArray['day'], $postArray['hour']);
+        $meeting->update();
+        echo json_encode($meeting);
+});
+
+$app->delete('/meetings/{id}', function ($request, $response, $args) {
+
+        $deleted = Meetings::deleteMeetingById($args['id']);
+        echo json_encode($deleted);
+
 });
 
 // === ROOMS ===
@@ -174,6 +226,12 @@ $app->get('/groups/{id}', function ($request, $response, $args) {
     echo json_encode($group);
 });
 
+$app->get('/groups/{id}/meetings', function ($request, $response, $args) {
+    $meetings = Group::getAllMeetingsOfGroup($args['id']);
+
+    echo json_encode($meetings);
+});
+
 $app->post('/groups/{id}', function ($request, $response, $args) {
     $post = json_decode($request->getBody());
     $postArray = get_object_vars($post);
@@ -189,8 +247,17 @@ $app->post('/groups/{id}', function ($request, $response, $args) {
 });
 
 $app->delete('/groups/{id}', function ($request, $response, $args) {
-    $deleted = Group::deleteGroupById($args['id']);
-    echo json_encode($deleted);
+    $group = Group::getGroupById($args['id']);
+    $server_params = $request->getServerParams();
+    if (preg_match("/Basic\s+(.*)$/i", $server_params[$this->options["environment"]], $matches)) {
+        list($user, $password) = explode(":", base64_decode($matches[1]));
+    }
+    if ($group->owner == $user) {
+        $deleted = Group::deleteGroupById($args['id']);
+        echo json_encode($deleted);
+    } else {
+        echo json_encode(false);
+    }
 });
 
 

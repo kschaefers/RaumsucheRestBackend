@@ -22,6 +22,16 @@ class Group
         $this->users[] = $member;
     }
 
+    function removeMember($member){
+        foreach($this->users as $key => $user){
+            if($user->id == $member->id){
+                unset($this->users[$key]);
+                break;
+            }
+        }
+        $this->users = array_values($this->users);
+    }
+
 	function add()
 	{
 		$pdo = db::getPDO();
@@ -156,5 +166,26 @@ class Group
             ':id' => $id
         ));
         return $result;
+    }
+
+
+    static function getAllMeetingsOfGroup($groupId)
+    {
+        $pdo = db::getPDO();
+        $st = $pdo->prepare(
+            "SELECT * FROM meetings
+            WHERE UserGroup = :groupId
+            ORDER BY g.Id"
+        );
+        $st->execute(array(
+            ':groupId' => $groupId
+        ));
+        $result = $st->fetchAll();
+        $meetings = array();
+        foreach($result as $meetingObject){
+            $meeting = new Meeting($meetingObject->MeetingId,$meetingObject->Room,$meetingObject->UserGroup,$meetingObject->Day,$meetingObject->Hour);
+            $meetings[] = $meeting;
+        }
+        return $meetings;
     }
 }
