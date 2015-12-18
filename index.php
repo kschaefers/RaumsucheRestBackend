@@ -233,17 +233,43 @@ $app->get('/groups/{id}/meetings', function ($request, $response, $args) {
 });
 
 $app->post('/groups/{id}', function ($request, $response, $args) {
-    $post = json_decode($request->getBody());
-    $postArray = get_object_vars($post);
-    $members = array();
-    $tmpMembers = $postArray['users'];
-    foreach ($tmpMembers as $tmpmember) {
-        $member = get_object_vars($tmpmember);
-        $members[] = new User($member['mtklNr'], '', '', '');
+
+    $group = Group::getGroupById($args['id']);
+    $server_params = $request->getServerParams();
+    if (preg_match("/Basic\s+(.*)$/i", $server_params[$this->options["environment"]], $matches)) {
+        list($user, $password) = explode(":", base64_decode($matches[1]));
     }
-    $group = new Group($args['id'], $postArray['name'], $postArray['owner'], $members, $postArray['groupImage']);
-    $group->update();
-    echo json_encode($group);
+
+    $isInGroup = false;
+    foreach($group->users as $groupUser){
+        if($groupUser->mtklNr == $user){
+            $isInGroup = true;
+            break;
+        }
+    }
+
+    if($isInGroup){
+        $post = json_decode($request->getBody());
+        $postArray = get_object_vars($post);
+        $members = array();
+        $groupUsers = $group->users;
+        $groupOwner = $group->owner;
+
+        if ($group->owner == $user) {
+            $groupOwner = $postArray['owner'];
+            $tmpMembers = $postArray['users'];
+            foreach ($tmpMembers as $tmpmember) {
+                $member = get_object_vars($tmpmember);
+                $members[] = new User($member['mtklNr'], '', '', '');
+            }
+            $groupUsers = $members;
+        }
+        $group = new Group($args['id'], $postArray['name'], $groupOwner, $groupUsers, $postArray['groupImage']);
+        $group->update();
+        echo json_encode($group);
+    } else {
+        echo json_encode(false);
+    }
 });
 
 $app->delete('/groups/{id}', function ($request, $response, $args) {
