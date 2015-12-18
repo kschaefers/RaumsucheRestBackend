@@ -79,7 +79,7 @@ $app->put('/register', function ($request, $response, $args) {
 
 $app->post('/users/{id}', function ($request, $response, $args) {
     $server_params = $request->getServerParams();
-    if (preg_match("/Basic\s+(.*)$/i", $server_params[$this->options["environment"]], $matches)) {
+    if (preg_match("/Basic\s+(.*)$/i", $server_params["REDIRECT_HTTP_AUTHORIZATION"], $matches)) {
         list($user, $password) = explode(":", base64_decode($matches[1]));
     }
     if ($args['id'] == $user) {
@@ -95,7 +95,7 @@ $app->post('/users/{id}', function ($request, $response, $args) {
 
 $app->delete('/users/{id}', function ($request, $response, $args) {
     $server_params = $request->getServerParams();
-    if (preg_match("/Basic\s+(.*)$/i", $server_params[$this->options["environment"]], $matches)) {
+    if (preg_match("/Basic\s+(.*)$/i", $server_params["REDIRECT_HTTP_AUTHORIZATION"], $matches)) {
         list($user, $password) = explode(":", base64_decode($matches[1]));
     }
     if ($args['id'] == $user) {
@@ -236,7 +236,7 @@ $app->post('/groups/{id}', function ($request, $response, $args) {
 
     $group = Group::getGroupById($args['id']);
     $server_params = $request->getServerParams();
-    if (preg_match("/Basic\s+(.*)$/i", $server_params[$this->options["environment"]], $matches)) {
+    if (preg_match("/Basic\s+(.*)$/i", $server_params["REDIRECT_HTTP_AUTHORIZATION"], $matches)) {
         list($user, $password) = explode(":", base64_decode($matches[1]));
     }
 
@@ -275,7 +275,7 @@ $app->post('/groups/{id}', function ($request, $response, $args) {
 $app->delete('/groups/{id}', function ($request, $response, $args) {
     $group = Group::getGroupById($args['id']);
     $server_params = $request->getServerParams();
-    if (preg_match("/Basic\s+(.*)$/i", $server_params[$this->options["environment"]], $matches)) {
+    if (preg_match("/Basic\s+(.*)$/i", $server_params["REDIRECT_HTTP_AUTHORIZATION"], $matches)) {
         list($user, $password) = explode(":", base64_decode($matches[1]));
     }
     if ($group->owner == $user) {
