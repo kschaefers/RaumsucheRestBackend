@@ -119,15 +119,32 @@ $app->delete('/users/{id}', function ($request, $response, $args) {
 });
 
 $app->get('/users/{id}/groups', function ($request, $response, $args) {
-    $groups = User::getAllGroupsOfUser($args['id']);
+    $server_params = $request->getServerParams();
+    if (preg_match("/Basic\s+(.*)$/i", $server_params["REDIRECT_HTTP_AUTHORIZATION"], $matches)) {
+        list($user, $password) = explode(":", base64_decode($matches[1]));
+    }
+    if ($args['id'] == $user) {
+        $groups = User::getAllGroupsOfUser($args['id']);
 
-    echo json_encode($groups);
+        echo json_encode($groups);
+
+    } else {
+        echo json_encode(false);
+    }
 });
 
-$app->get('/users/{id}/meetings', function ($request, $response, $args) {
-    $meetings = User::getAllMeetingsOfUser($args['id']);
+$app->get('/users/{id}/meetings', function ($request, $response, $args) {    $server_params = $request->getServerParams();
+    if (preg_match("/Basic\s+(.*)$/i", $server_params["REDIRECT_HTTP_AUTHORIZATION"], $matches)) {
+        list($user, $password) = explode(":", base64_decode($matches[1]));
+    }
+    if ($args['id'] == $user) {
+        $meetings = User::getAllMeetingsOfUser($args['id']);
 
-    echo json_encode($meetings);
+        echo json_encode($meetings);
+
+    } else {
+        echo json_encode(false);
+    }
 });
 
 // === MEETINGS ===
