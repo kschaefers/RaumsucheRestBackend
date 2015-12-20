@@ -119,4 +119,27 @@ class User
         }
         return $groups;
     }
+
+    static function getAllMeetingsOfUser($mtrklnr)
+    {
+        $pdo = db::getPDO();
+        $st = $pdo->prepare(
+            "SELECT m.* FROM meetings AS m
+            WHERE UserGroup in
+              (SELECT g.Id FROM user_in_group AS uig
+              LEFT JOIN groups AS g ON uig.groupId = g.Id
+              LEFT JOIN users AS u ON uig.userId = u.MtklNr
+              WHERE g.Id IN (SELECT groupId FROM user_in_group AS uig WHERE uig.userId = :mtklNr))"
+        );
+        $st->execute(array(
+            ':mtklNr' => $mtrklnr
+        ));
+        $result = $st->fetchAll();
+        $meetings = array();
+        for ($i = 0; $i < count($result); $i++) {
+            $group = new Group($result[$i]['UserGroup'], null, null, array(''), null);
+            $meetings[]=new Meeting($result[$i]['MeetingId'], $result[$i]['Room'], $group, $result[$i]['Day'], $result[$i]['Hour']);
+        }
+        return $meetings;
+    }
 }

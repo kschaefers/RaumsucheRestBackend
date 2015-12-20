@@ -124,6 +124,12 @@ $app->get('/users/{id}/groups', function ($request, $response, $args) {
     echo json_encode($groups);
 });
 
+$app->get('/users/{id}/meetings', function ($request, $response, $args) {
+    $meetings = User::getAllMeetingsOfUser($args['id']);
+
+    echo json_encode($meetings);
+});
+
 // === MEETINGS ===
 $app->get('/meetings/{id}', function ($request, $response, $args) {
     $meeting = Meeting::getMeetingById($args['id']);
@@ -149,18 +155,16 @@ $app->put('/meetings', function ($request, $response, $args) {
 });
 
 $app->post('/meetings/{id}', function ($request, $response, $args) {
-
-        $post = json_decode($request->getBody());
-        $postArray = get_object_vars($post);
-        $meeting = new Meeting($args['id'], $postArray['room'], new Group($postArray['group']->id,null,null,array(''),null), $postArray['day'], $postArray['hour']);
-        $meeting->update();
-        echo json_encode($meeting);
+    $post = json_decode($request->getBody());
+    $postArray = get_object_vars($post);
+    $meeting = new Meeting($args['id'], $postArray['room'], new Group($postArray['group']->id,null,null,array(''),null), $postArray['day'], $postArray['hour']);
+    $meeting->update();
+    echo json_encode($meeting);
 });
 
 $app->delete('/meetings/{id}', function ($request, $response, $args) {
-
-        $deleted = Meeting::deleteMeetingById($args['id']);
-        echo json_encode($deleted);
+    $deleted = Meeting::deleteMeetingById($args['id']);
+    echo json_encode($deleted);
 
 });
 
