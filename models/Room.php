@@ -30,7 +30,7 @@ class Room
             $hour = "1,2,3,4,5,6";
         }
         if(empty($day)){
-            $day = intval(date("w"));
+            $day = intval(date("w"))+1;
             if($day>5){
                 $day = 1;
             }
