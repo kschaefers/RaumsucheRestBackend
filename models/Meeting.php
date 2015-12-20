@@ -11,7 +11,7 @@ class Meeting
 	public $day;
 	public $hour;
 	
-	public function __construct($meetingId,Room $pRoom, Group $pGroup, $pDay, $pHour){
+	public function __construct($meetingId, $pRoom, Group $pGroup, $pDay, $pHour){
 		$this->meetingId = $meetingId;
 		$this->room = $pRoom;
 		$this->group = $pGroup;
@@ -71,7 +71,8 @@ class Meeting
 			':meetingId' => $id
 		));
 		$result = $st->fetch();
-		$meeting = new Meeting($result['MeetingId'], $result['Room'], $result['GroupId'], $result['Day'], $result['Hour']);
+		$group = Group::getGroupById($result['UserGroup']);
+		$meeting = new Meeting($result['MeetingId'], $result['Room'], $group, $result['Day'], $result['Hour']);
 		return $meeting;
 	}
 
