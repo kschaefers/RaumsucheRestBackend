@@ -131,12 +131,18 @@ $app->get('/meetings/{id}', function ($request, $response, $args) {
     echo json_encode($meeting);
 });
 
+$app->get('/meetings', function ($request, $response, $args) {
+    $meeting = Meeting::getMeetings();
+
+    echo json_encode($meeting);
+});
+
 $app->put('/meetings', function ($request, $response, $args) {
     $put = json_decode($request->getBody());
 
     // make it a PHP associative array
     $putArray = get_object_vars($put);
-    $meeting = new Meeting(null, $putArray['room'], $putArray['groupId'], $putArray['day'], $putArray['hour']);
+    $meeting = new Meeting(null, $putArray['room'], new Group($putArray['group']->id,null,null,array(''),null), $putArray['day'], $putArray['hour']);
     $meeting->add();
 
     echo json_encode($meeting);
@@ -146,14 +152,14 @@ $app->post('/meetings/{id}', function ($request, $response, $args) {
 
         $post = json_decode($request->getBody());
         $postArray = get_object_vars($post);
-        $meeting = new Meeting($args['id'], $postArray['room'], $postArray['groupId'], $postArray['day'], $postArray['hour']);
+        $meeting = new Meeting($args['id'], $postArray['room'], new Group($postArray['group']->id,null,null,array(''),null), $postArray['day'], $postArray['hour']);
         $meeting->update();
         echo json_encode($meeting);
 });
 
 $app->delete('/meetings/{id}', function ($request, $response, $args) {
 
-        $deleted = Meetings::deleteMeetingById($args['id']);
+        $deleted = Meeting::deleteMeetingById($args['id']);
         echo json_encode($deleted);
 
 });

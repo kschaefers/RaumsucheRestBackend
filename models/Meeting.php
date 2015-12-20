@@ -59,6 +59,20 @@ class Meeting
 		));
 	}
 
+	static function getMeetings()
+	{
+		$pdo = db::getPDO();
+		$st = $pdo->query("SELECT * FROM meetings");
+		$result = $st->fetchAll();
+		$meetings = array();
+		foreach ($result as $meetingArray) {
+			$group = Group::getGroupById($meetingArray['UserGroup']);
+			$meetings[] = new Meeting($meetingArray['MeetingId'], $meetingArray['Room'], $group, $meetingArray['Day'], $meetingArray['Hour']);
+		}
+
+		return $meetings;
+	}
+
 
 	static function getMeetingById($id)
 	{
@@ -80,7 +94,7 @@ class Meeting
 	{
 		$pdo = db::getPDO();
 		$st = $pdo->prepare(
-			"DELETE FROM meetings WHERE MeetingId = :id"
+			"DELETE FROM meetings WHERE MeetingId = :meetingId"
 		);
 		$result =  $st->execute(array(
 			':meetingId' => $id
