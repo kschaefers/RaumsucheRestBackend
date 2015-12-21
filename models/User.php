@@ -137,7 +137,7 @@ class User
         $result = $st->fetchAll();
         $meetings = array();
         for ($i = 0; $i < count($result); $i++) {
-            $group = new Group($result[$i]['UserGroup'], null, null, array(''), null);
+            $group = Group::getGroupById($result[$i]['UserGroup']);
             $meetings[]=new Meeting($result[$i]['MeetingId'], $result[$i]['Room'], $group, $result[$i]['Day'], $result[$i]['Hour']);
         }
         return $meetings;
